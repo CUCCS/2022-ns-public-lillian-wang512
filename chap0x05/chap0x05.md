@@ -84,18 +84,19 @@ TCP connect Scan(TCP连接扫描，或者TCP全连接扫描）。它是最简单
 #### **【CODE】**
 
 ```python
-from scapy.all import *
+from scapy.all import * #引入sys 和scapy两个模块
 
 
 def tcpconnect(dst_ip, dst_port, timeout=10):
-    pkts = sr1(IP(dst=dst_ip)/TCP(dport=dst_port,flags="S"),timeout=timeout)
+    pkts = sr1(IP(dst=dst_ip)/TCP(dport=dst_port,flags="S"),timeout=timeout) #构建TCP数据包，“S”是全开扫描
     if pkts is None:
         print("Filtered")
-    elif(pkts.haslayer(TCP)):
-        if(pkts.getlayer(TCP).flags == 0x12):  #Flags: 0x012 (SYN, ACK)
+    elif(pkts.haslayer(TCP)):  #返回数据包如果是TCP包
+        if(pkts.getlayer(TCP).flags == 0x12):  #Flags: 0x012 (SYN, ACK)，flags==0x12代表返回的是SYN+ACK数据包
             send_rst = sr(IP(dst=dst_ip)/TCP(dport=dst_port,flags="AR"),timeout=timeout)
             print("Open")
-        elif (pkts.getlayer(TCP).flags == 0x14):   #Flags: 0x014 (RST, ACK)
+        elif (pkts.getlayer(TCP).flags == 0x14):  
+            #Flags: 0x014 (RST, ACK)，flags==0x12代表返回的是reset数据包,对方拒绝建立连接
             print("Closed")
 
 tcpconnect('10.0.2.6', 80)
